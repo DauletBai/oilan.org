@@ -4,7 +4,7 @@ package server
 import (
 	"net/http"
 	"time"
-	"github.com/DauletBai/oilan.org/internal/infrastructure/handlers"
+	"oilan/internal/infrastructure/handlers"
 )
 
 // NewServer создает и настраивает новый HTTP сервер.
