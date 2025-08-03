@@ -1,0 +1,39 @@
+# Compiled Go binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+oilan
+bin/
+
+# Test binary, built with `go test -c`
+*.test
+
+# Go module files
+go.sum
+vendor/
+
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE configuration files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Configuration files and secrets
+# IMPORTANT: Never commit your actual config file with secrets!
+# Commit a template instead (e.g., config.example.yml)
+configs/config.yml
+*.env
+
+# Log files
+*.log
