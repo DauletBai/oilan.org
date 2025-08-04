@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"oilan/internal/app/services"
 	"oilan/internal/domain/repository"
+	"oilan/internal/infrastructure/middleware"
 	"strconv"
 )
 
@@ -46,9 +47,12 @@ func (h *APIHandlers) writeError(w http.ResponseWriter, status int, message stri
 
 // CreateDialogHandler handles requests to create a new dialog.
 func (h *APIHandlers) CreateDialogHandler(w http.ResponseWriter, r *http.Request) {
-	// For now, we'll use a hardcoded user ID.
-	// Later, this will come from a JWT token after authentication.
-	const currentUserID int64 = 1 
+	// Get the user ID that the middleware has placed in the context.
+	currentUserID, ok := r.Context().Value(middleware.UserIDContextKey).(int64)
+	if !ok {
+		h.writeError(w, http.StatusUnauthorized, "Could not identify user")
+		return
+	}
 
 	var requestBody struct {
 		Title string `json:"title"`
@@ -69,10 +73,13 @@ func (h *APIHandlers) CreateDialogHandler(w http.ResponseWriter, r *http.Request
 	h.writeJSON(w, http.StatusCreated, dialog)
 }
 
-// PostMessageHandler handles posting a new message to a dialog.
+// PostMessageHandler now gets the user ID from the request context.
 func (h *APIHandlers) PostMessageHandler(w http.ResponseWriter, r *http.Request) {
-	// Hardcoded user ID for now.
-	const currentUserID int64 = 1
+	currentUserID, ok := r.Context().Value(middleware.UserIDContextKey).(int64)
+	if !ok {
+		h.writeError(w, http.StatusUnauthorized, "Could not identify user")
+		return
+	}
 
 	// Extract dialogID from the URL path, e.g., /api/v1/dialogs/123/messages
 	dialogIDStr := r.PathValue("dialogID")

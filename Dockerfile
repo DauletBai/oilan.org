@@ -14,6 +14,7 @@ WORKDIR /app/
 COPY --from=builder /app/oilan .
 # Copy the configs folder into our final image
 COPY ./configs ./configs
+COPY ./web ./web
 
 EXPOSE 8080
 CMD ["./oilan"]
