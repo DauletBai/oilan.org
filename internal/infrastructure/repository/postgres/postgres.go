@@ -1,16 +1,16 @@
 // oilan/internal/infrastructure/repository/postgres/postgres.go
-package postgres 
+package postgres
 
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq" 
+	_ "github.com/lib/pq"
 	"os"
 )
 
-// NewConnection создает новое соединение с базой данных.
+// NewConnection creates a new database connection.
 func NewConnection() (*sql.DB, error) {
-	// Собираем строку подключения из переменных окружения
+	// Build connection string from environment variables
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_PORT"),
@@ -24,7 +24,7 @@ func NewConnection() (*sql.DB, error) {
 		return nil, err
 	}
 
-	// Проверяем, что соединение действительно установлено
+	// Ping the database to verify the connection is alive.
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}

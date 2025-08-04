@@ -7,13 +7,12 @@ import (
 	"oilan/internal/infrastructure/handlers"
 )
 
-// NewServer создает и настраивает новый HTTP сервер.
-func NewServer() *http.Server {
-    // Создаем новый роутер (мультиплексор)
+// NewServer creates and configures a new HTTP server.
+func NewServer(api *handlers.APIHandlers) *http.Server {
 	router := http.NewServeMux()
 
-    // Регистрируем все наши маршруты (URL)
-	handlers.RegisterRoutes(router)
+	// CORRECTED LINE: We now call RegisterRoutes as a method on the api object.
+	api.RegisterRoutes(router)
 
 	return &http.Server{
 		Addr:         ":8080",
