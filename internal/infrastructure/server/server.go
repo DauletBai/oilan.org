@@ -3,16 +3,17 @@ package server
 
 import (
 	"net/http"
-	"time"
 	"oilan/internal/infrastructure/handlers"
+	"time"
 )
 
-// NewServer creates and configures a new HTTP server.
-func NewServer(api *handlers.APIHandlers) *http.Server {
+// NewServer now accepts both API and Page handlers.
+func NewServer(api *handlers.APIHandlers, pages *handlers.PageHandlers) *http.Server {
 	router := http.NewServeMux()
 
-	// CORRECTED LINE: We now call RegisterRoutes as a method on the api object.
-	api.RegisterRoutes(router)
+	// CORRECTED CALL: We call the standalone function from the handlers package,
+	// passing it all the necessary dependencies.
+	handlers.RegisterRoutes(router, api, pages)
 
 	return &http.Server{
 		Addr:         ":8080",

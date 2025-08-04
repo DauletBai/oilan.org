@@ -2,11 +2,27 @@
 package handlers
 
 import (
-	"fmt"
+	"log"
 	"net/http"
+	"oilan/internal/view"
 )
 
-// HomeHandler обрабатывает запросы к главной странице.
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to Oilan Project!")
+// PageHandlers holds dependencies for page rendering handlers.
+type PageHandlers struct {
+	WelcomeTemplate *view.Template
+	// ChatTemplate will be here later
+}
+
+// WelcomeHandler renders the main welcome page.
+func (h *PageHandlers) WelcomeHandler(w http.ResponseWriter, r *http.Request) {
+	// We pass data to the template. Here, we set the page title.
+	data := map[string]interface{}{
+		"title": "Welcome",
+	}
+
+	err := h.WelcomeTemplate.Render(w, "base.html", data)
+	if err != nil {
+		log.Printf("Error rendering welcome template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
