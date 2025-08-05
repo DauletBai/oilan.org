@@ -14,6 +14,7 @@ func RegisterRoutes(mux *http.ServeMux, api *APIHandlers, pages *PageHandlers) {
 
 	// --- Page Handlers ---
 	mux.HandleFunc("/", pages.WelcomeHandler)
+	mux.HandleFunc("/chat", pages.ChatHandler)
 
 	// --- Authentication Handlers ---
 	mux.HandleFunc("/auth/{provider}/callback", api.AuthCallbackHandler)

@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 	"oilan/internal/app/services"
-	"oilan/internal/infrastructure/handlers"
 	//"oilan/internal/auth"
+	"oilan/internal/infrastructure/handlers"
 	"oilan/internal/infrastructure/llm"
 	"oilan/internal/infrastructure/repository/postgres"
 	"oilan/internal/infrastructure/server"
@@ -20,18 +20,17 @@ import (
 )
 
 func main() {
+	// Goth Configuration
 	googleClientID := os.Getenv("GOOGLE_CLIENT_ID")
 	googleClientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
 	callbackURL := "http://localhost:8080/auth/google/callback"
-
 	store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
 	gothic.Store = store
-
 	goth.UseProviders(
 		google.New(googleClientID, googleClientSecret, callbackURL, "email", "profile"),
 	)
 
-	// 1. Database Connection
+	// Database Connection
 	db, err := postgres.NewConnection()
 	if err != nil {
 		log.Fatalf("could not connect to database: %v", err)
@@ -39,20 +38,20 @@ func main() {
 	defer db.Close()
 	log.Println("Database connection successful")
 
-	// 2. Repositories
+	// Repositories
 	userRepo := postgres.NewUserRepository(db)
 	dialogRepo := postgres.NewDialogRepository(db)
 
-	// 3. LLM Client
+	// LLM Client
 	mockLLM := llm.NewMockLLMClient()
 
-	// 4. Services
+	// Services
 	chatService, err := services.NewChatService(dialogRepo, mockLLM)
 	if err != nil {
 		log.Fatalf("failed to create chat service: %v", err)
 	}
 
-	// 5. Template Parsing ---
+	// --- Template Parsing ---
 	welcomeTpl, err := view.NewTemplate(
 		"web/templates/base.html",
 		"web/templates/parts/head.html",
@@ -64,11 +63,26 @@ func main() {
 		log.Fatalf("could not parse welcome template: %v", err)
 	}
 
-	// 6. Handlers
-	apiHandlers := handlers.NewAPIHandlers(chatService, userRepo)
-	pageHandlers := &handlers.PageHandlers{WelcomeTemplate: welcomeTpl}
+	// --- ADDED MISSING BLOCK HERE ---
+	chatTpl, err := view.NewTemplate(
+		"web/templates/base.html",
+		"web/templates/parts/head.html",
+		"web/templates/parts/header.html",
+		"web/templates/parts/footer.html",
+		"web/templates/pages/chat.html",
+	)
+	if err != nil {
+		log.Fatalf("could not parse chat template: %v", err)
+	}
 
-	// 7. Server
+	// --- Handlers ---
+	apiHandlers := handlers.NewAPIHandlers(chatService, userRepo)
+	pageHandlers := &handlers.PageHandlers{
+		WelcomeTemplate: welcomeTpl,
+		ChatTemplate:    chatTpl, // Now this variable is defined
+	}
+
+	// --- Server ---
 	srv := server.NewServer(apiHandlers, pageHandlers)
 
 	log.Println("Starting server on :8080")

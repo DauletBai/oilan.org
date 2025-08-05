@@ -17,7 +17,8 @@ func (h *APIHandlers) BeginAuthHandler(w http.ResponseWriter, r *http.Request) {
 	gothic.BeginAuthHandler(w, r)
 }
 
-// AuthCallbackHandler now generates a JWT token upon successful login.
+// AuthCallbackHandler now generates a JWT token, sets it in a secure cookie,
+// and redirects the user to the chat page.
 func (h *APIHandlers) AuthCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	gothUser, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
@@ -47,16 +48,23 @@ func (h *APIHandlers) AuthCallbackHandler(w http.ResponseWriter, r *http.Request
 		user = existingUser
 	}
 	
-	// Generate JWT Token
 	tokenString, err := auth.GenerateToken(user)
 	if err != nil {
 		h.writeError(w, http.StatusInternalServerError, "Failed to generate token")
 		return
 	}
 
-	// For an actual application, you would redirect the user to the frontend
-	// with the token, e.g., http.Redirect(w, r, "http://localhost:3000?token="+tokenString, http.StatusTemporaryRedirect)
-	// For now, we will just display it.
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(fmt.Sprintf(`{"token": "%s"}`, tokenString)))
+	// Set the token in an HttpOnly cookie for security.
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt_token",
+		Value:    tokenString,
+		Expires:  time.Now().Add(72 * time.Hour),
+		Path:     "/",
+		HttpOnly: true, // The cookie cannot be accessed by JavaScript
+		Secure:   false, // In production, this should be true (for HTTPS)
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	// Redirect the user to the chat page.
+	http.Redirect(w, r, "/chat", http.StatusTemporaryRedirect)
 }
