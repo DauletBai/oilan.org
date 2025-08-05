@@ -11,5 +11,6 @@ type User struct {
 	Provider  string    `json:"provider"`   // e.g., "google", "microsoft"
 	ProviderID string   `json:"provider_id"`// User ID from the provider
 	Email     string    `json:"email"`      // User's email, verified by provider
+	Role      string    `json:"role"`       // "user", "admin")
 	CreatedAt time.Time `json:"created_at"` // Timestamp of user creation
 }

@@ -27,8 +27,6 @@ func NewAPIHandlers(cs *services.ChatService, ur repository.UserRepository) *API
 	}
 }
 
-// --- Helper Functions ---
-
 // writeJSON is a helper for sending JSON responses.
 func (h *APIHandlers) writeJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
@@ -43,7 +41,23 @@ func (h *APIHandlers) writeError(w http.ResponseWriter, status int, message stri
 	h.writeJSON(w, status, map[string]string{"error": message})
 }
 
-// --- API Handlers ---
+// GetSessionInfoHandler provides the frontend with essential session data.
+func (h *APIHandlers) GetSessionInfoHandler(w http.ResponseWriter, r *http.Request) {
+	// The AuthMiddleware has already run and placed the user ID in the context.
+	userID, ok := r.Context().Value(middleware.UserIDContextKey).(int64)
+	if !ok {
+		// This should theoretically never happen if the middleware is applied correctly.
+		h.writeError(w, http.StatusUnauthorized, "No valid session found")
+		return
+	}
+
+	// We can add more user info here if needed in the future.
+	sessionData := map[string]interface{}{
+		"userID": userID,
+	}
+
+	h.writeJSON(w, http.StatusOK, sessionData)
+}
 
 // CreateDialogHandler handles requests to create a new dialog.
 func (h *APIHandlers) CreateDialogHandler(w http.ResponseWriter, r *http.Request) {

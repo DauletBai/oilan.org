@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"oilan/internal/infrastructure/middleware" 
-	"strconv"
 
 	"github.com/gorilla/websocket"
 )
@@ -13,14 +12,22 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	// In production, you should check the origin of the request.
-	// For development, we can allow any origin.
-	CheckOrigin: func(r *http.Request) bool { return true },
+	CheckOrigin:     func(r *http.Request) bool { return true }, // For development
 }
 
 // ServeWs handles websocket requests from the client.
 func (h *APIHandlers) ServeWs(w http.ResponseWriter, r *http.Request) {
-	// Upgrade the HTTP connection to a WebSocket connection.
+	// --- THE CRITICAL FIX ---
+	// The AuthMiddleware has already run. We now get the userID from the context.
+	userID, ok := r.Context().Value(middleware.UserIDContextKey).(int64)
+	if !ok {
+		// This will only happen if middleware is not applied correctly.
+		http.Error(w, "Unauthorized: No user ID in context", http.StatusUnauthorized)
+		return
+	}
+
+	// We no longer need the dialogID from the query. A new dialog will be created on connection.
+	
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -28,45 +35,33 @@ func (h *APIHandlers) ServeWs(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	// Get user ID from the context (thanks to our middleware!)
-	userID, ok := r.Context().Value(middleware.UserIDContextKey).(int64)
-	if !ok {
-		log.Println("Could not get user ID from context")
-		return
-	}
-
-	// Get dialog ID from the query parameter, e.g., /ws/chat?dialogID=123
-	dialogIDStr := r.URL.Query().Get("dialogID")
-	dialogID, err := strconv.ParseInt(dialogIDStr, 10, 64)
+	// --- Create a new dialog for this WebSocket session ---
+	dialog, err := h.chatService.StartNewDialog(r.Context(), userID, "New WebSocket Chat")
 	if err != nil {
-		log.Println("Invalid dialog ID")
+		log.Printf("Failed to create new dialog for user %d: %v", userID, err)
 		return
 	}
+	dialogID := dialog.ID
+	log.Printf("User %d connected to new dialog %d via WebSocket", userID, dialogID)
 	
-	log.Printf("User %d connected to dialog %d via WebSocket", userID, dialogID)
+	// Send a welcome message.
+	conn.WriteMessage(websocket.TextMessage, []byte("Hello! I am ready. How can I help you today?"))
 
-	// This is the main loop for the connection.
+	// Main loop for the connection.
 	for {
-		// Read a message from the browser.
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			log.Println("Read error:", err)
+			log.Printf("User %d disconnected from dialog %d", userID, dialogID)
 			break
 		}
 
-		// Log the message for now.
-		log.Printf("Received from user %d: %s", userID, msg)
-
-		// Here, we will call our chatService to get the AI response.
 		aiResponse, err := h.chatService.PostMessage(r.Context(), dialogID, userID, string(msg))
 		if err != nil {
 			log.Println("ChatService error:", err)
-			// Send an error message back to the client.
 			conn.WriteMessage(websocket.TextMessage, []byte("Sorry, an error occurred."))
 			continue
 		}
 
-		// Send the AI's response back to the browser.
 		if err := conn.WriteMessage(websocket.TextMessage, []byte(aiResponse.Content)); err != nil {
 			log.Println("Write error:", err)
 			break

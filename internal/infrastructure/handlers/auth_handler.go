@@ -3,7 +3,7 @@ package handlers
 
 import (
 	"context"
-	"fmt"
+	//"fmt"
 	"net/http"
 	"oilan/internal/auth" 
 	"oilan/internal/domain"
@@ -17,12 +17,12 @@ func (h *APIHandlers) BeginAuthHandler(w http.ResponseWriter, r *http.Request) {
 	gothic.BeginAuthHandler(w, r)
 }
 
-// AuthCallbackHandler now generates a JWT token, sets it in a secure cookie,
-// and redirects the user to the chat page.
+// AuthCallbackHandler now sets a secure cookie and redirects to the chat page.
 func (h *APIHandlers) AuthCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	gothUser, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
-		fmt.Fprintf(w, "Error completing user auth: %v", err)
+		// In case of error, redirect to the home page with an error message
+		http.Redirect(w, r, "/?error=auth_failed", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -50,18 +50,18 @@ func (h *APIHandlers) AuthCallbackHandler(w http.ResponseWriter, r *http.Request
 	
 	tokenString, err := auth.GenerateToken(user)
 	if err != nil {
-		h.writeError(w, http.StatusInternalServerError, "Failed to generate token")
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
 	}
 
-	// Set the token in an HttpOnly cookie for security.
+	// Set the token in a secure, HttpOnly cookie.
 	http.SetCookie(w, &http.Cookie{
 		Name:     "jwt_token",
 		Value:    tokenString,
 		Expires:  time.Now().Add(72 * time.Hour),
 		Path:     "/",
-		HttpOnly: true, // The cookie cannot be accessed by JavaScript
-		Secure:   false, // In production, this should be true (for HTTPS)
+		HttpOnly: true,
+		Secure:   r.TLS != nil, // Use secure cookies in production (HTTPS)
 		SameSite: http.SameSiteLaxMode,
 	})
 
