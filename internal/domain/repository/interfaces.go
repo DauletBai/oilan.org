@@ -21,5 +21,6 @@ type DialogRepository interface {
 	Save(ctx context.Context, dialog *domain.Dialog) error
 	FindByID(ctx context.Context, id int64) (*domain.Dialog, error)
 	FindAllByUserID(ctx context.Context, userID int64) ([]*domain.Dialog, error)
+	GetAll(ctx context.Context) ([]*domain.Dialog, error) 
 	AddMessage(ctx context.Context, message *domain.Message) error
 }

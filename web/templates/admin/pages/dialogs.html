@@ -1,0 +1,29 @@
+{{define "content"}}
+<h1 class="h2">All Dialogs</h1>
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th scope="col">Dialog ID</th>
+                <th scope="col">User ID</th>
+                <th scope="col">Title</th>
+                <th scope="col">Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .dialogs}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.UserID}}</td>
+                <td>{{.Title}}</td>
+                <td>{{.UpdatedAt.Format "2006-01-02 15:04"}}</td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="4">No dialogs found.</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}

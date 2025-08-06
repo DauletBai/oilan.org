@@ -40,6 +40,7 @@ func RegisterRoutes(api *APIHandlers, pages *PageHandlers, admin *AdminHandlers,
 			r.Use(middleware.AdminMiddleware(userRepo))
 			r.Get("/dashboard", admin.DashboardHandler)
 			r.Get("/users", admin.UsersHandler)
+			r.Get("/dialogs", admin.DialogsHandler)
 		})
 	})
 

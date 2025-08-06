@@ -6,17 +6,14 @@ import (
 	"log"
 	"net/http"
 	"oilan/internal/app/services"
-	//"oilan/internal/auth"
 	"oilan/internal/domain/repository"
 	"oilan/internal/infrastructure/handlers"
 	"oilan/internal/infrastructure/llm"
-	//"oilan/internal/infrastructure/middleware"
 	"oilan/internal/infrastructure/repository/postgres"
 	"oilan/internal/infrastructure/server"
 	"oilan/internal/view"
 	"os"
 
-	//"github.com/go-chi/chi/v5"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -112,21 +109,34 @@ func main() {
 	)
 	if err != nil { log.Fatalf("could not parse chat template: %v", err) }
 
+	// --- THIS BLOCK IS CORRECTED ---
 	dashboardTpl, err := view.NewTemplate(
 		"web/templates/admin/base.html",
 		"web/templates/admin/parts/admin_head.html",
 		"web/templates/admin/parts/admin_header.html",
+		"web/templates/admin/parts/admin_sidebar.html", // Correct path
 		"web/templates/admin/pages/dashboard.html",
 	)
 	if err != nil { log.Fatalf("could not parse dashboard template: %v", err) }
-	
+
 	usersTpl, err := view.NewTemplate(
 		"web/templates/admin/base.html",
 		"web/templates/admin/parts/admin_head.html",
 		"web/templates/admin/parts/admin_header.html",
+		"web/templates/admin/parts/admin_sidebar.html", // Correct path
 		"web/templates/admin/pages/users.html",
 	)
 	if err != nil { log.Fatalf("could not parse users template: %v", err) }
+
+	dialogsTpl, err := view.NewTemplate(
+		"web/templates/admin/base.html",
+		"web/templates/admin/parts/admin_head.html",
+		"web/templates/admin/parts/admin_header.html",
+		"web/templates/admin/parts/admin_sidebar.html", // Correct path
+		"web/templates/admin/pages/dialogs.html",
+	)
+	if err != nil { log.Fatalf("could not parse dialogs template: %v", err) }
+	// --- END OF CORRECTION ---
 
 	// --- Handlers ---
 	apiHandlers := handlers.NewAPIHandlers(chatService, userRepo)
@@ -134,12 +144,12 @@ func main() {
 		WelcomeTemplate: welcomeTpl,
 		ChatTemplate:    chatTpl,
 	}
-	
-	// --- THIS IS THE FIX ---
 	adminHandlers := &handlers.AdminHandlers{
 		DashboardTemplate: dashboardTpl,
 		UsersTemplate:     usersTpl,
-		UserRepo:          userRepo, // We must pass the userRepo here
+		DialogsTemplate:   dialogsTpl,
+		UserRepo:          userRepo,
+		DialogRepo:        dialogRepo,
 	}
 
 	// --- Server ---

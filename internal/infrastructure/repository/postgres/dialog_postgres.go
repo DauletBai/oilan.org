@@ -27,7 +27,6 @@ func (r *dialogRepo) Save(ctx context.Context, dialog *domain.Dialog) error {
         VALUES ($1, $2, $3, $4)
         RETURNING id;
     `
-	// Set timestamps before saving
 	now := time.Now()
 	dialog.CreatedAt = now
 	dialog.UpdatedAt = now
@@ -41,9 +40,8 @@ func (r *dialogRepo) AddMessage(ctx context.Context, message *domain.Message) er
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback() // Rollback on error
+	defer tx.Rollback()
 
-	// 1. Insert the new message
 	msgQuery := `
         INSERT INTO messages (dialog_id, role, content, created_at)
         VALUES ($1, $2, $3, $4)
@@ -55,20 +53,17 @@ func (r *dialogRepo) AddMessage(ctx context.Context, message *domain.Message) er
 		return err
 	}
 
-	// 2. Update the parent dialog's updated_at timestamp
 	dialogQuery := `UPDATE dialogs SET updated_at = $1 WHERE id = $2;`
 	_, err = tx.ExecContext(ctx, dialogQuery, message.CreatedAt, message.DialogID)
 	if err != nil {
 		return err
 	}
 
-	// If all queries were successful, commit the transaction
 	return tx.Commit()
 }
 
 // FindByID finds a single dialog with all its messages.
 func (r *dialogRepo) FindByID(ctx context.Context, id int64) (*domain.Dialog, error) {
-	// First, get the dialog itself
 	dialogQuery := `SELECT id, user_id, title, created_at, updated_at FROM dialogs WHERE id = $1;`
 	dialog := &domain.Dialog{}
 	err := r.db.QueryRowContext(ctx, dialogQuery, id).Scan(
@@ -76,12 +71,11 @@ func (r *dialogRepo) FindByID(ctx context.Context, id int64) (*domain.Dialog, er
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil // Not found is a valid case, not an error
+			return nil, nil
 		}
 		return nil, err
 	}
 
-	// Then, get all messages for this dialog
 	messagesQuery := `SELECT id, dialog_id, role, content, created_at FROM messages WHERE dialog_id = $1 ORDER BY created_at ASC;`
 	rows, err := r.db.QueryContext(ctx, messagesQuery, id)
 	if err != nil {
@@ -102,6 +96,7 @@ func (r *dialogRepo) FindByID(ctx context.Context, id int64) (*domain.Dialog, er
 	return dialog, nil
 }
 
+// THIS IS THE MISSING METHOD
 // FindAllByUserID finds all dialogs for a specific user (without messages for performance).
 func (r *dialogRepo) FindAllByUserID(ctx context.Context, userID int64) ([]*domain.Dialog, error) {
 	query := `SELECT id, user_id, title, created_at, updated_at FROM dialogs WHERE user_id = $1 ORDER BY updated_at DESC;`
@@ -120,5 +115,28 @@ func (r *dialogRepo) FindAllByUserID(ctx context.Context, userID int64) ([]*doma
 		dialogs = append(dialogs, &dialog)
 	}
 
+	return dialogs, nil
+}
+// END OF MISSING METHOD
+
+// GetAll retrieves all dialogs from the database.
+func (r *dialogRepo) GetAll(ctx context.Context) ([]*domain.Dialog, error) {
+	query := `SELECT id, user_id, title, created_at, updated_at FROM dialogs ORDER BY updated_at DESC;`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var dialogs []*domain.Dialog
+	for rows.Next() {
+		var dialog domain.Dialog
+		if err := rows.Scan(
+			&dialog.ID, &dialog.UserID, &dialog.Title, &dialog.CreatedAt, &dialog.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		dialogs = append(dialogs, &dialog)
+	}
 	return dialogs, nil
 }
