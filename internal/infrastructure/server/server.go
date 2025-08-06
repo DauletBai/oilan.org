@@ -8,12 +8,10 @@ import (
 	"time"
 )
 
-// NewServer now accepts all handler types and the user repository for middleware.
+// NewServer now uses the router returned by RegisterRoutes.
 func NewServer(api *handlers.APIHandlers, pages *handlers.PageHandlers, admin *handlers.AdminHandlers, userRepo repository.UserRepository) *http.Server {
-	router := http.NewServeMux()
-
-	// Pass all dependencies to the router function.
-	handlers.RegisterRoutes(router, api, pages, admin, userRepo)
+	// The router is now configured inside RegisterRoutes
+	router := handlers.RegisterRoutes(api, pages, admin, userRepo)
 
 	return &http.Server{
 		Addr:         ":8080",

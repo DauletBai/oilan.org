@@ -17,14 +17,14 @@
   <style>
     .stroke {
       fill: none;
-      stroke: #cccccc;
+      stroke: rgba(13, 110, 253, 0.5);
       stroke-width: 48;
       stroke-linecap: round;
     }
 
     .flow {
       fill: none;
-      stroke: #333333;
+      stroke: rgb(13, 110, 253);
       stroke-width: 30;
       stroke-linecap: round;
       stroke-dasharray: 60;
@@ -45,30 +45,30 @@
     @keyframes bloodFlowForward {
       0% {
         stroke-dashoffset: 120;
-        opacity: 0.6;
+        opacity: 0.8;
       }
       50% {
         stroke-dashoffset: 60;
-        opacity: 0.9;
+        opacity: 1;
       }
       100% {
         stroke-dashoffset: 0;
-        opacity: 0.6;
+        opacity: 0.8;
       }
     }
 
     @keyframes bloodFlowReverse {
       0% {
         stroke-dashoffset: 0;
-        opacity: 0.6;
+        opacity: 0.8;
       }
       50% {
         stroke-dashoffset: 60;
-        opacity: 0.9;
+        opacity: 1;
       }
       100% {
         stroke-dashoffset: 120;
-        opacity: 0.6;
+        opacity: 0.8;
       }
     }
 

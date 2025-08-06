@@ -2,12 +2,15 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"oilan/internal/app/services"
-	// "oilan/internal/auth"
+	//"oilan/internal/auth"
+	"oilan/internal/domain/repository"
 	"oilan/internal/infrastructure/handlers"
 	"oilan/internal/infrastructure/llm"
+	//"oilan/internal/infrastructure/middleware"
 	"oilan/internal/infrastructure/repository/postgres"
 	"oilan/internal/infrastructure/server"
 	"oilan/internal/view"
@@ -19,8 +22,38 @@ import (
 	"github.com/markbates/goth/providers/google"
 )
 
+// This function runs on startup to ensure the configured admin user exists and has the correct role.
+func bootstrapAdmin(userRepo repository.UserRepository) {
+	adminEmail := os.Getenv("ADMIN_EMAIL")
+	if adminEmail == "" {
+		log.Println("ADMIN_EMAIL not set, skipping admin bootstrap.")
+		return
+	}
+
+	ctx := context.Background()
+	user, err := userRepo.FindByEmail(ctx, adminEmail)
+	if err != nil {
+		log.Printf("Error finding admin user by email: %v", err)
+		return
+	}
+
+	if user != nil {
+		if user.Role != "admin" {
+			log.Printf("Promoting user %s to admin...", adminEmail)
+			user.Role = "admin"
+			if err := userRepo.Update(ctx, user); err != nil {
+				log.Printf("Failed to promote user to admin: %v", err)
+			} else {
+				log.Printf("User %s successfully promoted to admin.", adminEmail)
+			}
+		}
+	} else {
+		log.Printf("Admin user %s not found in database. Please log in once to create the user.", adminEmail)
+	}
+}
+
 func main() {
-	// Goth Configuration
+	// --- Goth Configuration ---
 	googleClientID := os.Getenv("GOOGLE_CLIENT_ID")
 	googleClientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
 	callbackURL := "http://localhost:8080/auth/google/callback"
@@ -30,7 +63,7 @@ func main() {
 		google.New(googleClientID, googleClientSecret, callbackURL, "email", "profile"),
 	)
 
-	// Database Connection
+	// --- Database Connection ---
 	db, err := postgres.NewConnection()
 	if err != nil {
 		log.Fatalf("could not connect to database: %v", err)
@@ -38,21 +71,21 @@ func main() {
 	defer db.Close()
 	log.Println("Database connection successful")
 
-	// Repositories
+	// --- Repositories ---
 	userRepo := postgres.NewUserRepository(db)
 	dialogRepo := postgres.NewDialogRepository(db)
 
-	// LLM Client
-	// We are now switching from the mock client to the real OpenAI client.
-	// mockLLM := llm.NewMockLLMClient() 
-	// llmClient := llm.NewOpenAIClient()
-	llmClient, err := llm.NewGeminiClient() 
+	// --- Call the bootstrap function right after creating the repositories ---
+	bootstrapAdmin(userRepo)
+
+	// --- LLM Client ---
+	llmClient, err := llm.NewGeminiClient()
 	if err != nil {
 		log.Fatalf("failed to create gemini client: %v", err)
 	}
 
-	// Services
-	chatService, err := services.NewChatService(dialogRepo, llmClient) // Pass the real client
+	// --- Services ---
+	chatService, err := services.NewChatService(dialogRepo, llmClient)
 	if err != nil {
 		log.Fatalf("failed to create chat service: %v", err)
 	}
@@ -69,7 +102,6 @@ func main() {
 		log.Fatalf("could not parse welcome template: %v", err)
 	}
 
-	// --- ADDED MISSING BLOCK HERE ---
 	chatTpl, err := view.NewTemplate(
 		"web/templates/base.html",
 		"web/templates/parts/head.html",
@@ -81,7 +113,6 @@ func main() {
 		log.Fatalf("could not parse chat template: %v", err)
 	}
 
-	// --- DashboardTpl Parsing ---
 	dashboardTpl, err := view.NewTemplate(
 		"web/templates/admin/base.html",
 		"web/templates/admin/parts/admin_head.html",
@@ -96,7 +127,7 @@ func main() {
 	apiHandlers := handlers.NewAPIHandlers(chatService, userRepo)
 	pageHandlers := &handlers.PageHandlers{
 		WelcomeTemplate: welcomeTpl,
-		ChatTemplate:    chatTpl, 
+		ChatTemplate:    chatTpl,
 	}
 	adminHandlers := &handlers.AdminHandlers{DashboardTemplate: dashboardTpl}
 

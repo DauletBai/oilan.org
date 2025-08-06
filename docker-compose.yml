@@ -12,9 +12,12 @@ services:
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - SESSION_SECRET=${SESSION_SECRET}
+    # Gemini API key is now included in the envairment variables
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     # OpenAI API key is now included in the environment variables
     #  - OPENAI_API_KEY=${OPENAI_API_KEY}
+    # Admin email is also included for the admin interface
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
     # DB credentials are still here, which is fine for local development
       - DB_HOST=db
       - DB_PORT=5432

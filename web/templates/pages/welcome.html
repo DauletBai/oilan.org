@@ -1,11 +1,94 @@
 {{define "content"}}
-<div class="px-4 py-5 my-5 text-center">
-    <img src="/static/brand/logo.svg" alt="Oilan logo" class="d-block mx-auto mb-4" style="width: 64px;">
-    <h1 class="display-5 fw-bold">Welcome to Oilan</h1>
+<div class="px-4 py-4 my-3 text-center">
+    <svg class="rounded-circle heartbeat" width="80" height="80" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <!-- Stroke линии (Параллельные, 45 градусов влево) -->
+        <line class="stroke" x1="75" y1="75" x2="325" y2="325" />
+        <line class="stroke" x1="125" y1="25" x2="375" y2="275" />
+        <line class="stroke" x1="25" y1="125" x2="275" y2="375" />
+        <!-- Stroke линии (Параллельные, 45 градусов вправо) -->
+        <line class="stroke" x1="75" y1="325" x2="325" y2="75" />
+        <line class="stroke" x1="125" y1="375" x2="375" y2="125" />
+        <line class="stroke" x1="25" y1="275" x2="275" y2="25" />
+        <!-- Анимация крови -->
+        <line class="flow flow-1" x1="75" y1="75" x2="325" y2="325" />
+        <line class="flow flow-2" x1="125" y1="25" x2="375" y2="275" />
+        <line class="flow flow-3" x1="25" y1="125" x2="275" y2="375" />
+        <line class="flow flow-4" x1="75" y1="325" x2="325" y2="75" />
+        <line class="flow flow-5" x1="125" y1="375" x2="375" y2="125" />
+        <line class="flow flow-6" x1="25" y1="275" x2="275" y2="25" />
+        <style>
+            .stroke {
+                fill: none;
+                stroke: rgba(13, 110, 253, 0.25);
+                stroke-width: 48;
+                stroke-linecap: round;
+            }
+            .flow {
+                fill: none;
+                stroke: rgb(13, 110, 253);
+                stroke-width: 30;
+                stroke-linecap: round;
+                stroke-dasharray: 60;
+                stroke-dashoffset: 120;
+                animation-duration: 1.5s;
+                animation-timing-function: ease-in-out;
+                animation-iteration-count: infinite;
+            }
+            .flow-1, .flow-4 {
+                animation-name: bloodFlowForward;
+            }
+            .flow-2, .flow-3, .flow-5, .flow-6 {
+                animation-name: bloodFlowReverse;
+            }
+            @keyframes bloodFlowForward {
+                0% {
+                    stroke-dashoffset: 120;
+                    opacity: 0.5;
+                }
+                50% {
+                    stroke-dashoffset: 60;
+                    opacity: 1;
+                }
+                100% {
+                    stroke-dashoffset: 0;
+                    opacity: 0.7;
+                }
+            }
+
+            @keyframes bloodFlowReverse {
+                0% {
+                    stroke-dashoffset: 0;
+                    opacity: 0.5;
+                }
+                50% {
+                    stroke-dashoffset: 60;
+                    opacity: 1;
+                }
+                100% {
+                    stroke-dashoffset: 120;
+                    opacity: 0.7;
+                }
+            }
+            /* ❤️ Heartbeat */
+            .heartbeat {
+                animation: heartbeat 1.8s ease-in-out infinite;
+                transform-origin: center;
+            }
+            @keyframes heartbeat {
+                0%   { transform: scale(1); }
+                14%  { transform: scale(1.1); }
+                28%  { transform: scale(1); }
+                42%  { transform: scale(1.08); }
+                70%  { transform: scale(1); }
+                100% { transform: scale(1); }
+            }
+        </style>
+    </svg>
+    <h1 class="display-3 mt-4">Welcome to Oilan</h1>
     <div class="col-lg-6 mx-auto">
-        <p class="lead mb-4">Your guide to self-healing through dialogue. Please log in to begin your session.</p>
+        <p class="lead mb-4">Your guide to self-healing through personal, candid dialogue with AI.</p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a href="/auth/google" class="btn btn-primary btn-lg px-4 gap-3">Login with Google</a>
+            <a href="/auth/google" class="btn btn-primary px-4 gap-3">Login with Google</a>
         </div>
     </div>
 </div>

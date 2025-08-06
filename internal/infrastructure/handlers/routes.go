@@ -5,43 +5,43 @@ import (
 	"net/http"
 	"oilan/internal/domain/repository"
 	"oilan/internal/infrastructure/middleware"
+
+	"github.com/go-chi/chi/v5"
 )
 
-// RegisterRoutes is a standalone function that registers all application routes.
-func RegisterRoutes(mux *http.ServeMux, api *APIHandlers, pages *PageHandlers, admin *AdminHandlers, userRepo repository.UserRepository) {
-	// --- Static File Server ---
-	fileServer := http.FileServer(http.Dir("./web/static"))
-	mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
+// RegisterRoutes now uses a cleaner structure for middleware.
+func RegisterRoutes(api *APIHandlers, pages *PageHandlers, admin *AdminHandlers, userRepo repository.UserRepository) http.Handler {
+	r := chi.NewRouter()
 
-	// --- Page Handlers ---
-	mux.HandleFunc("/", pages.WelcomeHandler)
-	mux.HandleFunc("/chat", pages.ChatHandler)
+	// --- Public Routes ---
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
+	r.Get("/", pages.WelcomeHandler)
+	r.Get("/auth/{provider}", api.BeginAuthHandler)
+	r.Get("/auth/{provider}/callback", api.AuthCallbackHandler)
 
-	// --- Authentication Handlers ---
-	mux.HandleFunc("/auth/{provider}/callback", api.AuthCallbackHandler)
-	mux.HandleFunc("/auth/{provider}", api.BeginAuthHandler)
-	
-	// --- Secure API Handlers ---
-	// Create a sub-router for our authenticated API v1
-	apiV1 := http.NewServeMux()
-	apiV1.HandleFunc("POST /dialogs", api.CreateDialogHandler)
-	apiV1.HandleFunc("POST /dialogs/{dialogID}/messages", api.PostMessageHandler)
-	apiV1.HandleFunc("GET /session", api.GetSessionInfoHandler)
+	// --- Authenticated Routes ---
+	// All routes inside this group will first pass through AuthMiddleware.
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.AuthMiddleware)
 
-	// Apply the AuthMiddleware to all /api/v1 routes
-	mux.Handle("/api/v1/", http.StripPrefix("/api/v1", middleware.AuthMiddleware(apiV1)))
+		// Regular authenticated pages
+		r.Get("/chat", pages.ChatHandler)
+		r.Get("/ws/chat", api.ServeWs)
+		
+		// Authenticated API endpoints
+		r.Route("/api/v1", func(r chi.Router) {
+			r.Get("/session", api.GetSessionInfoHandler)
+			r.Post("/dialogs", api.CreateDialogHandler)
+		})
 
-	// --- WebSocket Handler ---
-	mux.Handle("/ws/chat", middleware.AuthMiddleware(http.HandlerFunc(api.ServeWs)))
+		// --- Admin Routes ---
+		// This sub-group has an additional AdminMiddleware.
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(middleware.AdminMiddleware(userRepo))
+			r.Get("/dashboard", admin.DashboardHandler)
+			r.Get("/users", admin.UsersHandler)
+		})
+	})
 
-	// --- Admin Routes ---
-	adminRouter := http.NewServeMux()
-	adminRouter.HandleFunc("/admin/dashboard", admin.DashboardHandler)
-	
-	// Protect all admin routes with two layers of security
-	mux.Handle("/admin/", http.StripPrefix("/admin", 
-		middleware.AuthMiddleware(
-			middleware.AdminMiddleware(adminRouter, userRepo),
-		),
-	))
+	return r
 }
