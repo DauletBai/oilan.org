@@ -16,6 +16,7 @@ import (
 	"oilan/internal/view"
 	"os"
 
+	//"github.com/go-chi/chi/v5"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -75,6 +76,8 @@ func main() {
 	userRepo := postgres.NewUserRepository(db)
 	dialogRepo := postgres.NewDialogRepository(db)
 
+	bootstrapAdmin(userRepo)
+
 	// --- Call the bootstrap function right after creating the repositories ---
 	bootstrapAdmin(userRepo)
 
@@ -98,9 +101,7 @@ func main() {
 		"web/templates/parts/footer.html",
 		"web/templates/pages/welcome.html",
 	)
-	if err != nil {
-		log.Fatalf("could not parse welcome template: %v", err)
-	}
+	if err != nil { log.Fatalf("could not parse welcome template: %v", err) }
 
 	chatTpl, err := view.NewTemplate(
 		"web/templates/base.html",
@@ -109,9 +110,7 @@ func main() {
 		"web/templates/parts/footer.html",
 		"web/templates/pages/chat.html",
 	)
-	if err != nil {
-		log.Fatalf("could not parse chat template: %v", err)
-	}
+	if err != nil { log.Fatalf("could not parse chat template: %v", err) }
 
 	dashboardTpl, err := view.NewTemplate(
 		"web/templates/admin/base.html",
@@ -119,9 +118,15 @@ func main() {
 		"web/templates/admin/parts/admin_header.html",
 		"web/templates/admin/pages/dashboard.html",
 	)
-	if err != nil {
-		log.Fatalf("could not parse dashboard template: %v", err)
-	}
+	if err != nil { log.Fatalf("could not parse dashboard template: %v", err) }
+	
+	usersTpl, err := view.NewTemplate(
+		"web/templates/admin/base.html",
+		"web/templates/admin/parts/admin_head.html",
+		"web/templates/admin/parts/admin_header.html",
+		"web/templates/admin/pages/users.html",
+	)
+	if err != nil { log.Fatalf("could not parse users template: %v", err) }
 
 	// --- Handlers ---
 	apiHandlers := handlers.NewAPIHandlers(chatService, userRepo)
@@ -129,7 +134,13 @@ func main() {
 		WelcomeTemplate: welcomeTpl,
 		ChatTemplate:    chatTpl,
 	}
-	adminHandlers := &handlers.AdminHandlers{DashboardTemplate: dashboardTpl}
+	
+	// --- THIS IS THE FIX ---
+	adminHandlers := &handlers.AdminHandlers{
+		DashboardTemplate: dashboardTpl,
+		UsersTemplate:     usersTpl,
+		UserRepo:          userRepo, // We must pass the userRepo here
+	}
 
 	// --- Server ---
 	srv := server.NewServer(apiHandlers, pageHandlers, adminHandlers, userRepo)
