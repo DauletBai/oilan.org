@@ -25,7 +25,7 @@ function handleChatPage() {
         const messageDiv = document.createElement('div');
         messageDiv.className = `px-3 py-2 rounded-3`;
         messageDiv.style.maxWidth = '75%';
-        messageDiv.classList.add(colorClass);
+        messageDiv.classList.add(...colorClass.split(" "));
         messageDiv.textContent = content;
         messageWrapper.appendChild(messageDiv);
         chatWindowBody.appendChild(messageWrapper);
