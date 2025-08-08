@@ -135,10 +135,21 @@ func main() {
 		"web/templates/admin/base.html",
 		"web/templates/admin/parts/admin_head.html",
 		"web/templates/admin/parts/admin_header.html",
-		"web/templates/admin/parts/admin_sidebar.html", // Correct path
+		"web/templates/admin/parts/admin_sidebar.html", 
 		"web/templates/admin/pages/dialogs.html",
 	)
 	if err != nil { log.Fatalf("could not parse dialogs template: %v", err) }
+
+	dialogViewTpl, err := view.NewTemplate(
+		"web/templates/admin/base.html",
+		"web/templates/admin/parts/admin_head.html",
+		"web/templates/admin/parts/admin_header.html",
+		"web/templates/admin/parts/admin_sidebar.html",
+		"web/templates/admin/pages/dialog_view.html",
+	)
+	if err != nil {
+		log.Fatalf("could not parse dialog view template: %v", err)
+	}
 
 	// --- Handlers ---
 	apiHandlers := handlers.NewAPIHandlers(chatService, userRepo, dialogRepo)
@@ -147,11 +158,12 @@ func main() {
 		ChatTemplate:    chatTpl,
 	}
 	adminHandlers := &handlers.AdminHandlers{
-		DashboardTemplate: dashboardTpl,
-		UsersTemplate:     usersTpl,
-		DialogsTemplate:   dialogsTpl,
-		UserRepo:          userRepo,
-		DialogRepo:        dialogRepo,
+		DashboardTemplate:  dashboardTpl,
+		UsersTemplate:      usersTpl,
+		DialogsTemplate:    dialogsTpl,
+		DialogViewTemplate: dialogViewTpl,
+		UserRepo:           userRepo,
+		DialogRepo:         dialogRepo,
 	}
 
 	// --- Server ---

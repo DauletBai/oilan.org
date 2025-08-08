@@ -66,13 +66,11 @@ func (h *APIHandlers) GetSessionInfoHandler(w http.ResponseWriter, r *http.Reque
 // GetDialogsHandler returns a list of all dialogs for the authenticated user.
 func (h *APIHandlers) GetDialogsHandler(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDContextKey).(int64)
-
 	dialogs, err := h.dialogRepo.FindAllByUserID(r.Context(), userID)
 	if err != nil {
 		h.writeError(w, http.StatusInternalServerError, "Could not retrieve dialogs")
 		return
 	}
-
 	h.writeJSON(w, http.StatusOK, dialogs)
 }
 

@@ -1,0 +1,33 @@
+{{define "content"}}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dialog #{{.dialog.ID}}</h1>
+    <a href="/admin/dialogs" class="btn btn-sm btn-outline-secondary">Back to all dialogs</a>
+</div>
+
+<h5>User ID: {{.dialog.UserID}}</h5>
+<p class="text-muted">Last updated: {{.dialog.UpdatedAt.Format "2006-01-02 15:04"}}</p>
+
+<div class="chat-history mt-4">
+    {{range .dialog.Messages}}
+        <div class="mb-3">
+            {{if eq .Role "user"}}
+                <div class="card bg-primary text-white ms-auto" style="max-width: 75%;">
+                    <div class="card-body">
+                        <p class="card-text">{{.Content}}</p>
+                        <small class="text-white-50 float-end">{{.CreatedAt.Format "15:04"}}</small>
+                    </div>
+                </div>
+            {{else}}
+                <div class="card bg-light border" style="max-width: 75%;">
+                    <div class="card-body">
+                        <p class="card-text">{{.Content}}</p>
+                        <small class="text-muted float-end">{{.CreatedAt.Format "15:04"}}</small>
+                    </div>
+                </div>
+            {{end}}
+        </div>
+    {{else}}
+        <p>No messages in this dialog.</p>
+    {{end}}
+</div>
+{{end}}
