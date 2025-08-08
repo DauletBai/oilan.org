@@ -6,14 +6,17 @@ import (
 	"log"
 	"net/http"
 	"oilan/internal/app/services"
+	//"oilan/internal/auth"
 	"oilan/internal/domain/repository"
 	"oilan/internal/infrastructure/handlers"
 	"oilan/internal/infrastructure/llm"
+	//"oilan/internal/infrastructure/middleware"
 	"oilan/internal/infrastructure/repository/postgres"
 	"oilan/internal/infrastructure/server"
 	"oilan/internal/view"
 	"os"
 
+	//"github.com/go-chi/chi/v5"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -136,10 +139,9 @@ func main() {
 		"web/templates/admin/pages/dialogs.html",
 	)
 	if err != nil { log.Fatalf("could not parse dialogs template: %v", err) }
-	// --- END OF CORRECTION ---
 
 	// --- Handlers ---
-	apiHandlers := handlers.NewAPIHandlers(chatService, userRepo)
+	apiHandlers := handlers.NewAPIHandlers(chatService, userRepo, dialogRepo)
 	pageHandlers := &handlers.PageHandlers{
 		WelcomeTemplate: welcomeTpl,
 		ChatTemplate:    chatTpl,

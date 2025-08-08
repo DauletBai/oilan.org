@@ -96,7 +96,6 @@ func (r *dialogRepo) FindByID(ctx context.Context, id int64) (*domain.Dialog, er
 	return dialog, nil
 }
 
-// THIS IS THE MISSING METHOD
 // FindAllByUserID finds all dialogs for a specific user (without messages for performance).
 func (r *dialogRepo) FindAllByUserID(ctx context.Context, userID int64) ([]*domain.Dialog, error) {
 	query := `SELECT id, user_id, title, created_at, updated_at FROM dialogs WHERE user_id = $1 ORDER BY updated_at DESC;`
@@ -117,7 +116,6 @@ func (r *dialogRepo) FindAllByUserID(ctx context.Context, userID int64) ([]*doma
 
 	return dialogs, nil
 }
-// END OF MISSING METHOD
 
 // GetAll retrieves all dialogs from the database.
 func (r *dialogRepo) GetAll(ctx context.Context) ([]*domain.Dialog, error) {

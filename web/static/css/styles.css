@@ -1,0 +1,18 @@
+/* oilan/web/static/css/styles.css */
+
+/* This style applies to the container holding our user-facing dialog list */
+.dialog-list-container {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* This makes sure our main content area takes up all available vertical space */
+.admin-main {
+    height: calc(100vh - 48px); /* 100% of viewport height minus the navbar height */
+}
+
+/* This makes the sidebar itself scrollable if its content is too long */
+.sidebar-sticky {
+    height: 100%;
+    overflow-y: auto;
+}

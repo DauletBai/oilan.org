@@ -11,19 +11,23 @@ import (
 	"oilan/internal/domain/repository"
 	"oilan/internal/infrastructure/middleware"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 // APIHandlers holds all dependencies for API handlers.
 type APIHandlers struct {
 	chatService *services.ChatService
 	userRepo    repository.UserRepository
+	dialogRepo  repository.DialogRepository
 }
 
 // NewAPIHandlers creates a new instance of APIHandlers.
-func NewAPIHandlers(cs *services.ChatService, ur repository.UserRepository) *APIHandlers {
+func NewAPIHandlers(cs *services.ChatService, ur repository.UserRepository, dr repository.DialogRepository) *APIHandlers {
 	return &APIHandlers{
 		chatService: cs,
 		userRepo:    ur,
+		dialogRepo:  dr,
 	}
 }
 
@@ -59,14 +63,29 @@ func (h *APIHandlers) GetSessionInfoHandler(w http.ResponseWriter, r *http.Reque
 	h.writeJSON(w, http.StatusOK, sessionData)
 }
 
-// CreateDialogHandler handles requests to create a new dialog.
-func (h *APIHandlers) CreateDialogHandler(w http.ResponseWriter, r *http.Request) {
-	// Get the user ID that the middleware has placed in the context.
-	currentUserID, ok := r.Context().Value(middleware.UserIDContextKey).(int64)
-	if !ok {
-		h.writeError(w, http.StatusUnauthorized, "Could not identify user")
+// GetDialogsHandler returns a list of all dialogs for the authenticated user.
+func (h *APIHandlers) GetDialogsHandler(w http.ResponseWriter, r *http.Request) {
+	userID, _ := r.Context().Value(middleware.UserIDContextKey).(int64)
+
+	dialogs, err := h.dialogRepo.FindAllByUserID(r.Context(), userID)
+	if err != nil {
+		h.writeError(w, http.StatusInternalServerError, "Could not retrieve dialogs")
 		return
 	}
+
+	h.writeJSON(w, http.StatusOK, dialogs)
+}
+
+// CreateDialogHandler handles requests to create a new dialog.
+func (h *APIHandlers) CreateDialogHandler(w http.ResponseWriter, r *http.Request) {
+	userID, _ := r.Context().Value(middleware.UserIDContextKey).(int64)
+
+	// Get the user ID that the middleware has placed in the context.
+	// currentUserID, ok := r.Context().Value(middleware.UserIDContextKey).(int64)
+	// if !ok {
+	// 	h.writeError(w, http.StatusUnauthorized, "Could not identify user")
+	// 	return
+	// }
 
 	var requestBody struct {
 		Title string `json:"title"`
@@ -77,7 +96,7 @@ func (h *APIHandlers) CreateDialogHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	dialog, err := h.chatService.StartNewDialog(r.Context(), currentUserID, requestBody.Title)
+	dialog, err := h.chatService.StartNewDialog(r.Context(), userID, requestBody.Title)
 	if err != nil {
 		log.Printf("Error creating dialog: %v", err)
 		h.writeError(w, http.StatusInternalServerError, "Could not create dialog")
@@ -89,11 +108,13 @@ func (h *APIHandlers) CreateDialogHandler(w http.ResponseWriter, r *http.Request
 
 // PostMessageHandler now gets the user ID from the request context.
 func (h *APIHandlers) PostMessageHandler(w http.ResponseWriter, r *http.Request) {
-	currentUserID, ok := r.Context().Value(middleware.UserIDContextKey).(int64)
-	if !ok {
-		h.writeError(w, http.StatusUnauthorized, "Could not identify user")
-		return
-	}
+	userID, _ := r.Context().Value(middleware.UserIDContextKey).(int64)
+
+	// currentUserID, ok := r.Context().Value(middleware.UserIDContextKey).(int64)
+	// if !ok {
+	// 	h.writeError(w, http.StatusUnauthorized, "Could not identify user")
+	// 	return
+	// }
 
 	// Extract dialogID from the URL path, e.g., /api/v1/dialogs/123/messages
 	dialogIDStr := r.PathValue("dialogID")
@@ -115,7 +136,7 @@ func (h *APIHandlers) PostMessageHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	aiMessage, err := h.chatService.PostMessage(r.Context(), dialogID, currentUserID, requestBody.Content)
+	aiMessage, err := h.chatService.PostMessage(r.Context(), dialogID, userID, requestBody.Content)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			h.writeError(w, http.StatusNotFound, "Dialog not found")
@@ -127,4 +148,34 @@ func (h *APIHandlers) PostMessageHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	h.writeJSON(w, http.StatusOK, aiMessage)
+}
+
+// GetDialogByIDHandler returns a single dialog with all its messages.
+func (h *APIHandlers) GetDialogByIDHandler(w http.ResponseWriter, r *http.Request) {
+	userID, _ := r.Context().Value(middleware.UserIDContextKey).(int64)
+
+	dialogIDStr := chi.URLParam(r, "dialogID") // Using chi to get URL parameter
+	dialogID, err := strconv.ParseInt(dialogIDStr, 10, 64)
+	if err != nil {
+		h.writeError(w, http.StatusBadRequest, "Invalid dialog ID")
+		return
+	}
+
+	dialog, err := h.dialogRepo.FindByID(r.Context(), dialogID)
+	if err != nil {
+		h.writeError(w, http.StatusInternalServerError, "Could not retrieve dialog")
+		return
+	}
+	if dialog == nil {
+		h.writeError(w, http.StatusNotFound, "Dialog not found")
+		return
+	}
+
+	// Security check: ensure the user owns this dialog.
+	if dialog.UserID != userID {
+		h.writeError(w, http.StatusForbidden, "Access denied")
+		return
+	}
+
+	h.writeJSON(w, http.StatusOK, dialog)
 }

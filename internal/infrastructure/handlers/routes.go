@@ -32,6 +32,9 @@ func RegisterRoutes(api *APIHandlers, pages *PageHandlers, admin *AdminHandlers,
 		r.Route("/api/v1", func(r chi.Router) {
 			r.Get("/session", api.GetSessionInfoHandler)
 			r.Post("/dialogs", api.CreateDialogHandler)
+			r.Get("/dialogs", api.GetDialogsHandler)
+			r.Post("/dialogs/{dialogID}/messages", api.PostMessageHandler)
+			r.Get("/dialogs/{dialogID}", api.GetDialogByIDHandler)
 		})
 
 		// --- Admin Routes ---
