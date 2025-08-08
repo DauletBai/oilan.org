@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleChatPage() {
     let socket = null;
 
+    const chatWindowCard = document.getElementById('chat-window');
     const chatWindowBody = document.querySelector('#chat-window .card-body');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
@@ -25,11 +26,15 @@ function handleChatPage() {
         const messageDiv = document.createElement('div');
         messageDiv.className = `px-3 py-2 rounded-3`;
         messageDiv.style.maxWidth = '75%';
-        messageDiv.classList.add(...colorClass.split(" "));
+        messageDiv.classList.add(...colorClass.split(' '));
         messageDiv.textContent = content;
+
         messageWrapper.appendChild(messageDiv);
         chatWindowBody.appendChild(messageWrapper);
-        chatWindowBody.scrollTop = chatWindowBody.scrollHeight;
+        // Auto scroll down
+        requestAnimationFrame(() => {
+            chatWindowCard.scrollTo({ top: chatWindowCard.scrollHeight, behavior: 'smooth' });
+        });
     }
 
     function connectWebSocket() {

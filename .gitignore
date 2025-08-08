@@ -33,6 +33,7 @@ Thumbs.db
 # IMPORTANT: Never commit your actual config file with secrets!
 # Commit a template instead (e.g., config.example.yml)
 configs/config.yml
+configs/prompt_therapist.txt
 *.env
 
 # Log files
