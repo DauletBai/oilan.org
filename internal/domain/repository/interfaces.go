@@ -1,9 +1,9 @@
-// oilan/internal/domain/repository/interfaces.go
+// github.com/DauletBai/oilan.org/internal/domain/repository/interfaces.go
 package repository
 
 import (
 	"context"
-	"oilan/internal/domain"
+	"github.com/DauletBai/oilan.org/internal/domain"
 )
 
 // UserRepository defines the interface for user data storage.

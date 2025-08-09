@@ -1,10 +1,10 @@
-// oilan/internal/infrastructure/handlers/websocket_handler.go
+// github.com/DauletBai/oilan.org/internal/infrastructure/handlers/websocket_handler.go
 package handlers
 
 import (
 	"log"
 	"net/http"
-	"oilan/internal/infrastructure/middleware"
+	"github.com/DauletBai/oilan.org/internal/infrastructure/middleware"
 	//"strconv"
 
 	"github.com/gorilla/websocket"

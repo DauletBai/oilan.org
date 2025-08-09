@@ -1,10 +1,10 @@
-// oilan/internal/infrastructure/handlers/routes.go
+// github.com/DauletBai/oilan.org/internal/infrastructure/handlers/routes.go
 package handlers
 
 import (
 	"net/http"
-	"oilan/internal/domain/repository"
-	"oilan/internal/infrastructure/middleware"
+	"github.com/DauletBai/oilan.org/internal/domain/repository"
+	"github.com/DauletBai/oilan.org/internal/infrastructure/middleware"
 
 	"github.com/go-chi/chi/v5"
 )

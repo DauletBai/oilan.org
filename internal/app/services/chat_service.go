@@ -1,12 +1,12 @@
-// oilan/internal/app/services/chat_service.go
+// github.com/DauletBai/oilan.org/internal/app/services/chat_service.go
 package services
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"oilan/internal/domain"
-	"oilan/internal/domain/repository"
+	"github.com/DauletBai/oilan.org/internal/domain"
+	"github.com/DauletBai/oilan.org/internal/domain/repository"
 	"os"
 	"time"
 )

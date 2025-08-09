@@ -1,19 +1,19 @@
-// oilan/cmd/server/main.go
+// github.com/DauletBai/oilan.org/cmd/server/main.go
 package main
 
 import (
 	"context"
 	"log"
 	"net/http"
-	"oilan/internal/app/services"
-	//"oilan/internal/auth"
-	"oilan/internal/domain/repository"
-	"oilan/internal/infrastructure/handlers"
-	"oilan/internal/infrastructure/llm"
-	//"oilan/internal/infrastructure/middleware"
-	"oilan/internal/infrastructure/repository/postgres"
-	"oilan/internal/infrastructure/server"
-	"oilan/internal/view"
+	"github.com/DauletBai/oilan.org/internal/app/services"
+	//"github.com/DauletBai/oilan.org/internal/auth"
+	"github.com/DauletBai/oilan.org/internal/domain/repository"
+	"github.com/DauletBai/oilan.org/internal/infrastructure/handlers"
+	"github.com/DauletBai/oilan.org/internal/infrastructure/llm"
+	//"github.com/DauletBai/oilan.org/internal/infrastructure/middleware"
+	"github.com/DauletBai/oilan.org/internal/infrastructure/repository/postgres"
+	"github.com/DauletBai/oilan.org/internal/infrastructure/server"
+	"github.com/DauletBai/oilan.org/internal/view"
 	"os"
 
 	//"github.com/go-chi/chi/v5"

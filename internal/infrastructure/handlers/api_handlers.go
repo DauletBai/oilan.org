@@ -1,4 +1,4 @@
-// oilan/internal/infrastructure/handlers/api_handlers.go
+// github.com/DauletBai/oilan.org/internal/infrastructure/handlers/api_handlers.go
 package handlers
 
 import (
@@ -7,9 +7,9 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"oilan/internal/app/services"
-	"oilan/internal/domain/repository"
-	"oilan/internal/infrastructure/middleware"
+	"github.com/DauletBai/oilan.org/internal/app/services"
+	"github.com/DauletBai/oilan.org/internal/domain/repository"
+	"github.com/DauletBai/oilan.org/internal/infrastructure/middleware"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"

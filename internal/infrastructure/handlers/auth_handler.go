@@ -1,12 +1,12 @@
-// oilan/internal/infrastructure/handlers/auth_handler.go
+// github.com/DauletBai/oilan.org/internal/infrastructure/handlers/auth_handler.go
 package handlers
 
 import (
 	"context"
 	//"fmt"
 	"net/http"
-	"oilan/internal/auth" 
-	"oilan/internal/domain"
+	"github.com/DauletBai/oilan.org/internal/auth" 
+	"github.com/DauletBai/oilan.org/internal/domain"
 	"time"
 
 	"github.com/markbates/goth/gothic"

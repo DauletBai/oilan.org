@@ -1,10 +1,10 @@
-// oilan/internal/infrastructure/llm/mock_client.go
+// github.com/DauletBai/oilan.org/internal/infrastructure/llm/mock_client.go
 package llm
 
 import (
 	"context"
-	"oilan/internal/app/services"
-	"oilan/internal/domain"
+	"github.com/DauletBai/oilan.org/internal/app/services"
+	"github.com/DauletBai/oilan.org/internal/domain"
 	"time"
 )
 

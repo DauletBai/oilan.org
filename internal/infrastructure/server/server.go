@@ -1,10 +1,10 @@
-// oilan/internal/infrastructure/server/server.go
+// github.com/DauletBai/oilan.org/internal/infrastructure/server/server.go
 package server
 
 import (
 	"net/http"
-	"oilan/internal/domain/repository"
-	"oilan/internal/infrastructure/handlers"
+	"github.com/DauletBai/oilan.org/internal/domain/repository"
+	"github.com/DauletBai/oilan.org/internal/infrastructure/handlers"
 	"time"
 )
 

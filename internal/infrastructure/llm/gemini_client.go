@@ -1,11 +1,11 @@
-// oilan/internal/infrastructure/llm/gemini_client.go
+// github.com/DauletBai/oilan.org/internal/infrastructure/llm/gemini_client.go
 package llm
 
 import (
 	"context"
 	"fmt"
-	"oilan/internal/app/services"
-	"oilan/internal/domain"
+	"github.com/DauletBai/oilan.org/internal/app/services"
+	"github.com/DauletBai/oilan.org/internal/domain"
 	"os"
 
 	"github.com/google/generative-ai-go/genai"

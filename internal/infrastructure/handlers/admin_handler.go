@@ -1,11 +1,11 @@
-// oilan/internal/infrastructure/handlers/admin_handler.go
+// github.com/DauletBai/oilan.org/internal/infrastructure/handlers/admin_handler.go
 package handlers
 
 import (
 	"log"
 	"net/http"
-	"oilan/internal/domain/repository" 
-	"oilan/internal/view"
+	"github.com/DauletBai/oilan.org/internal/domain/repository" 
+	"github.com/DauletBai/oilan.org/internal/view"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"

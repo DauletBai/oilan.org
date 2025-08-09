@@ -1,10 +1,10 @@
-// oilan/internal/infrastructure/handlers/pages.go
+// github.com/DauletBai/oilan.org/internal/infrastructure/handlers/pages.go
 package handlers
 
 import (
 	"log"
 	"net/http"
-	"oilan/internal/view"
+	"github.com/DauletBai/oilan.org/internal/view"
 )
 
 // PageHandlers holds dependencies for page rendering handlers.

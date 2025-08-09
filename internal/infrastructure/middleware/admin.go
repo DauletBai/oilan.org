@@ -1,10 +1,10 @@
-// oilan/internal/infrastructure/middleware/admin.go
+// github.com/DauletBai/oilan.org/internal/infrastructure/middleware/admin.go
 package middleware
 
 import (
 	"context"
 	"net/http"
-	"oilan/internal/domain/repository"
+	"github.com/DauletBai/oilan.org/internal/domain/repository"
 )
 
 // AdminMiddleware is a factory that returns a new middleware handler.

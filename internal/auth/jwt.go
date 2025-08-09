@@ -1,8 +1,8 @@
-// oilan/internal/auth/jwt.go
+// github.com/DauletBai/oilan.org/internal/auth/jwt.go
 package auth
 
 import (
-	"oilan/internal/domain"
+	"github.com/DauletBai/oilan.org/internal/domain"
 	"os"
 	"time"
 

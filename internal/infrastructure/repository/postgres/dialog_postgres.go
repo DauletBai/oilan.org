@@ -1,12 +1,12 @@
-// oilan/internal/infrastructure/repository/postgres/dialog_postgres.go
+// github.com/DauletBai/oilan.org/internal/infrastructure/repository/postgres/dialog_postgres.go
 package postgres
 
 import (
 	"context"
 	"database/sql"
 	"errors"
-	"oilan/internal/domain"
-	"oilan/internal/domain/repository"
+	"github.com/DauletBai/oilan.org/internal/domain"
+	"github.com/DauletBai/oilan.org/internal/domain/repository"
 	"time"
 )
 
